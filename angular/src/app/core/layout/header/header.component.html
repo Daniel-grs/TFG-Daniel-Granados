@@ -1,0 +1,20 @@
+<header>
+  <a routerLink="/" class="logo">RouteMaster</a>
+  <nav>
+    @if(!isLoggedIn()){
+      <a routerLink="/login">{{ loginText() }}</a>
+    } @else {
+      <a (click)="logout()" style="cursor: pointer;">{{ logoutText() }}</a>
+    }
+    
+    <a routerLink="/user-info">{{ userAreaText() }}</a>
+
+    <button (click)="switchLanguage()" class="lang-btn">
+      {{ languageText() }}: {{ currentLangDisplay() }}
+    </button>
+
+    <button (click)="switchTheme()" class="theme-btn">
+      {{ translation.translate('header.theme') }} {{ translation.translate('header.' + theme.getCurrentTheme().toLowerCase()) }}
+    </button>
+  </nav>
+</header>

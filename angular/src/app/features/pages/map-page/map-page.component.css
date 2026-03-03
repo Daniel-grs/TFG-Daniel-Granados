@@ -1,0 +1,103 @@
+:host {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  overflow: hidden;
+}
+
+#map,
+.map-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.gas-station-widget {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--color-card);
+  border: 2px solid var(--color-primary-light);
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 50;
+  max-width: 320px;
+  color: var(--color-text);
+  font-family: Arial, sans-serif;
+}
+
+.widget-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.widget-content h3 {
+  margin: 0 0 10px 0;
+  color: var(--color-primary);
+}
+
+.widget-content p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.widget-content strong {
+  color: var(--color-text);
+}
+
+:host {
+  --map-btn-bg: #9fb7ff;
+  --map-btn-bg-hover: #86a6ff;
+  --map-btn-text: #0e1726;
+  --map-btn-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.dark :host {
+  --map-btn-bg: #2fd3c8;
+  --map-btn-bg-hover: #22c3b8;
+  --map-btn-text: #06201e;
+  --map-btn-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
+:host button {
+  appearance: none;
+  border: 0;
+  padding: 9px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  background: var(--map-btn-bg);
+  color: var(--map-btn-text);
+  box-shadow: var(--map-btn-shadow);
+  transition: transform 0.08s ease, filter 0.2s ease, background 0.2s ease;
+}
+
+:host button:hover {
+  background: var(--map-btn-bg-hover);
+  filter: brightness(1.02);
+  transform: translateY(-1px);
+}
+
+:host button:active {
+  transform: translateY(0);
+}
+
+:host button[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.widget-content button {
+  margin-top: 10px;
+  align-self: flex-end;
+}

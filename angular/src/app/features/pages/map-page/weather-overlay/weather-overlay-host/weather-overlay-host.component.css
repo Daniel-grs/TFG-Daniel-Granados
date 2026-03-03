@@ -1,0 +1,68 @@
+.weather-overlay-host__container {
+  position: absolute !important;
+  top: 0 !important;
+  right: 60px !important;
+  z-index: 999 !important;
+  transition: right 0.12s ease, top 0.08s ease, opacity 0.12s ease, visibility 0.12s !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.weather-tab-container {
+  position: absolute !important;
+  top: 0 !important;
+  right: 64px !important;
+  z-index: 20 !important;
+  width: 40px !important;
+  height: 40px !important;
+  margin: 10px !important;
+  padding: 0 !important;
+  background: #fff !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  box-shadow: rgba(0, 0, 0, 0.3) 0 1px 4px -1px !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  user-select: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  transform: none !important;
+}
+
+.weather-tab-container[style] {
+  top: 0 !important;
+  right: 60px !important;
+  margin: 10px !important;
+}
+
+.weather-tab-container > span,
+.weather-tab-container .weather-icon,
+.weather-tab-container img {
+  width: 18px !important;
+  height: 18px !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  display: inline-block !important;
+}
+
+.weather-tab-container:focus {
+  outline: none !important;
+  box-shadow: rgba(0, 0, 0, 0.3) 0 1px 4px -1px !important;
+}
+
+.dark .weather-tab-container {
+  background: #335a86 !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28) !important;
+}
+
+.dark .weather-tab-container > span,
+.dark .weather-tab-container .weather-icon,
+.dark .weather-tab-container img {
+  color: #f3f7ff !important;
+}

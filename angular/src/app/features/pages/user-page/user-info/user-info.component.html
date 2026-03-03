@@ -1,0 +1,68 @@
+<div class="user-info">
+  <h2>{{ translation.translate('userInfo.title') }}</h2>
+  
+    <div class="user-details">
+      <p><strong>{{ translation.translate('userInfo.email') }}</strong> {{ user().email }}</p>
+      <p><strong>{{ translation.translate('userInfo.name') }}</strong> {{ user().name }}</p>
+      <p><strong>{{ translation.translate('userInfo.surname') }}</strong> {{ user().surname }}</p>
+    </div>
+  
+  <div class="favorites-section">
+    <h3>{{ translation.translate('userInfo.favoriteRoutes') }}</h3>
+    @if (favoriteRoutes().length > 0) {
+      <ul>
+        @for (route of favoriteRoutes(); track route.routeId) {
+          <li class="route-item" (click)="toggleRouteSelection(route)">
+            <div style="display: flex; justify-content: space-between;">
+              <div>
+                <div>{{ route.name }}</div>
+                <div>{{ translation.translate('userInfo.distance') }} {{ route.distanceKm }} km</div>
+                <div>{{ translation.translate('userInfo.origin') }} {{ route.points[0]?.address || translation.translate('userInfo.na') }}, {{ translation.translate('userInfo.destination') }} {{ route.points[1]?.address || translation.translate('userInfo.na') }}</div>
+                @if (route.canShare) {
+                  <button (click)="shareRoute(route)">{{ translation.translate('userInfo.share') }}</button>
+                }
+              </div>
+              @if (selectedRoute() === route.routeId) {
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                  <button (click)="deleteRoute(route)">{{ translation.translate('userInfo.delete') }}</button>
+                  <button (click)="renameRoute(route)">{{ translation.translate('userInfo.rename') }}</button>
+                </div>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p>{{ translation.translate('userInfo.noRoutes') }}</p>
+    }
+    <button (click)="goToLanding()">{{ translation.translate('userInfo.create') }}</button>
+  </div>
+  
+  <div class="favorites-section">
+    <h3>{{ translation.translate('userInfo.favoriteGas') }}</h3>
+    <button (click)="toggleSortByPrice()">{{ sortByPrice() ? translation.translate('userInfo.deactivateSort') : translation.translate('userInfo.activateSort') }}</button>
+    @if (favoriteGasStations().length > 0) {
+      <ul>
+        @for (station of (sortByPrice() ? sortedStations() : favoriteGasStations()); track station.idEstacion) {
+          <li class="gas-station-item" (click)="toggleGasStationSelection(station)">
+            <div>{{ station.alias || translation.translate('userInfo.alias') }} - {{ station.nombreEstacion }} - {{ station.direccion }}</div>
+            @if (selectedGasStations().has(station.idEstacion)) {
+              <div class="gas-station-details">
+                <p><strong>{{ translation.translate('userInfo.brand') }}</strong> {{ station.marca }}</p>
+                <p><strong>{{ translation.translate('userInfo.schedule') }}</strong> {{ station.horario }}</p>
+                <p><strong>{{ translation.translate('userInfo.saleType') }}</strong> {{ getStationType(station.tipoVenta) }}</p>
+                <p><strong>{{ translation.translate('userInfo.gas95') }}</strong> {{ station.Gasolina95 !== null ? station.Gasolina95 + ' €' : translation.translate('userInfo.na') }} ({{ translation.translate('userInfo.average') }} {{ station.Gasolina95_media !== null ? station.Gasolina95_media + ' €' : translation.translate('userInfo.na') }})</p>
+                <p><strong>{{ translation.translate('userInfo.gas98') }}</strong> {{ station.Gasolina98 !== null ? station.Gasolina98 + ' €' : translation.translate('userInfo.na') }} ({{ translation.translate('userInfo.average') }} {{ station.Gasolina98_media !== null ? station.Gasolina98_media + ' €' : translation.translate('userInfo.na') }})</p>
+                <p><strong>{{ translation.translate('userInfo.diesel') }}</strong> {{ station.Diesel !== null ? station.Diesel + ' €' : translation.translate('userInfo.na') }} ({{ translation.translate('userInfo.average') }} {{ station.Diesel_media !== null ? station.Diesel_media + ' €' : translation.translate('userInfo.na') }})</p>
+                <p><strong>{{ translation.translate('userInfo.dieselB') }}</strong> {{ station.DieselB !== null ? station.DieselB + ' €' : translation.translate('userInfo.na') }} ({{ translation.translate('userInfo.average') }} {{ station.DieselB_media !== null ? station.DieselB_media + ' €' : translation.translate('userInfo.na') }})</p>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p>{{ translation.translate('userInfo.noGas') }}</p>
+    }
+    <button (click)="goToPreferences()">{{ translation.translate('userInfo.createModify') }}</button>
+  </div>
+</div>

@@ -1,0 +1,69 @@
+<div class="weather-overlay" role="region" [attr.aria-label]="translation.translate('weather.title')">
+  <header class="weather-header">
+    <div class="weather-title">{{ translation.translate('weather.title') }}</div>
+    <div class="weather-actions">
+      <button class="btn close" (click)="close.emit()" [attr.aria-label]="translation.translate('weather.close')">✕</button>
+    </div>
+  </header>
+
+  @if (data(); as weatherPoints) {
+    @if (currentHourStr(); as currentHourStr) {
+      <div class="weather-body">
+        @for (weatherPoint of weatherPoints; track weatherPoint.address; let i = $index) {
+          <div class="weather-entry">
+            <div class="weather-entry-top">
+              <div class="weather-entry-index">{{ i + 1 }}</div>
+              <div class="weather-entry-main">
+                <div class="weather-entry-address" title="{{ weatherPoint.address }}">{{ weatherPoint.address }}</div>
+              </div>
+            </div>
+
+            <div class="weather-summary-compact">
+              @if (getForHour(weatherPoint.weatherDescription, currentHourStr); as desc) {
+                <div class="weather-desc">{{ translateWeatherDesc(desc) }}</div>
+              } @else {
+                <div class="weather-desc weather-empty-value">{{ translation.translate('weather.noDescription') }}</div>
+              }
+
+              @if (hasForHour(weatherPoint.temperatures, currentHourStr)) {
+                <div class="weather-temp">{{ getForHour(weatherPoint.temperatures, currentHourStr) }}°C</div>
+              } @else {
+                <div class="weather-temp weather-empty-value">{{ translation.translate('weather.noTemperature') }}</div>
+              }
+            </div>
+
+            <details class="weather-details">
+              <summary class="weather-summary">{{ translation.translate('weather.viewFullSchedule') }}</summary>
+
+              <div class="weather-content">
+                <div class="weather-current-hour-line">{{ translation.translate('weather.currentHour') }}: <strong>{{ currentHourStr }}</strong> @if (currentHour() < 13) { <strong>{{ translation.translate('weather.am') }}</strong> } @else { <strong>{{ translation.translate('weather.pm') }}</strong> }</div>
+
+                <h4 class="weather-section-title">{{ translation.translate('weather.descriptionByHour') }}</h4>
+                <ul class="weather-hour-list">
+                  @for (entry of hourEntries(weatherPoint.weatherDescription); track entry[0]) {
+                    <li [class.weather-hour-current]="entry[0] === currentHourStr">
+                      <span class="hour-key">{{ entry[0] }}:00</span>
+                      <span class="hour-val">{{ translateWeatherDesc(entry[1]) }}</span>
+                    </li>
+                  }
+                </ul>
+
+                <h4 class="weather-section-title">{{ translation.translate('weather.temperaturesByHour') }}</h4>
+                <ul class="weather-hour-list">
+                  @for (entry of hourEntries(weatherPoint.temperatures); track entry[0]) {
+                    <li [class.weather-hour-current]="entry[0] === currentHourStr">
+                      <span class="hour-key">{{ entry[0] }}:00</span>
+                      <span class="hour-val">{{ entry[1] }}°C</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            </details>
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    <div class="weather-empty">{{ translation.translate('weather.noData') }}</div>
+  }
+</div>

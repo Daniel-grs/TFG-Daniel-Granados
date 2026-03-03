@@ -1,0 +1,27 @@
+<div class="map-wrapper">
+  <div id="map" class="map-canvas" aria-label="Mapa"></div>
+
+  @if (selectedGasStation()) {
+  <div class="gas-station-widget" (click)="closeWidget()">
+    <div class="widget-content" (click)="$event.stopPropagation()">
+      <h3>{{ selectedGasStation()!.nombreEstacion }}</h3>
+      <p><strong>{{ translation.translate('userInfo.brand') }}</strong> {{ selectedGasStation()!.marca }}</p>
+      <p><strong>{{ translation.translate('userInfo.schedule') }}</strong> {{ selectedGasStation()!.horario }}</p>
+      <p><strong>{{ translation.translate('userInfo.saleType') }}</strong> {{ getStationType(selectedGasStation()!.tipoVenta) }}</p>
+      <p><strong>{{ translation.translate('userInfo.gas95') }}</strong> {{ selectedGasStation()!.Gasolina95 !== null ? selectedGasStation()!.Gasolina95 + ' €' : translation.translate('userInfo.na') }} ({{ translation.translate('userInfo.average') }} {{ selectedGasStation()!.Gasolina95_media !== null ? selectedGasStation()!.Gasolina95_media + ' €' : translation.translate('userInfo.na') }})</p>
+      <p><strong>{{ translation.translate('userInfo.gas98') }}</strong> {{ selectedGasStation()!.Gasolina98 !== null ? selectedGasStation()!.Gasolina98 + ' €' : translation.translate('userInfo.na') }} ({{ translation.translate('userInfo.average') }} {{ selectedGasStation()!.Gasolina98_media !== null ? selectedGasStation()!.Gasolina98_media + ' €' : translation.translate('userInfo.na') }})</p>
+      <p><strong>{{ translation.translate('userInfo.diesel') }}</strong> {{ selectedGasStation()!.Diesel !== null ? selectedGasStation()!.Diesel + ' €' : translation.translate('userInfo.na') }} ({{ translation.translate('userInfo.average') }} {{ selectedGasStation()!.Diesel_media !== null ? selectedGasStation()!.Diesel_media + ' €' : translation.translate('userInfo.na') }})</p>
+      <p><strong>{{ translation.translate('userInfo.dieselB') }}</strong> {{ selectedGasStation()!.DieselB !== null ? selectedGasStation()!.DieselB + ' €' : translation.translate('userInfo.na') }} ({{ translation.translate('userInfo.average') }} {{ selectedGasStation()!.DieselB_media !== null ? selectedGasStation()!.DieselB_media + ' €' : translation.translate('userInfo.na') }})</p>
+      <button (click)="closeWidget()">Cerrar</button>
+    </div>
+  </div>
+}
+
+  @if (showWeather()) {
+    <app-weather-overlay-host
+      [mapDiv]="map?.getDiv() ?? null"
+      [weatherRoute]="weatherRoute()"
+      [createdRoute]="createdRoute()">
+    </app-weather-overlay-host>
+  }
+</div>

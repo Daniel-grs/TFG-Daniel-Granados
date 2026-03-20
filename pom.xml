@@ -8,11 +8,11 @@
 		<version>4.0.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>es.metrica.sept25</groupId>
-	<artifactId>evolutivo</artifactId>
+	<groupId>tfgDaniel</groupId>
+	<artifactId>TFG</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>evolutivo</name>
-	<description>Proyecto Evolutivo</description>
+	<name>TFG-Daniel</name>
+	<description>TFG</description>
 	<url/>
 	<licenses>
 		<license/>

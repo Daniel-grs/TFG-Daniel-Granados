@@ -54,4 +54,13 @@ export class MapStateService {
   clear() {
     this._state.set(initialState);
   }
+
+  setRoute(route: Coords[]) {
+  this._state.update(s => ({
+    ...s,
+    route: route ?? [],
+    loading: false,
+    error: null,
+  }));
+}
 }

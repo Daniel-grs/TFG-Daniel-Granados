@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../app/services/auth.service';
 import { AuthStateService } from '../../app/services/auth-state.service';
+import { UserPreferencesStateService } from '../../app/services/user-preferences-state.service';
 
 @Component({
   selector: 'app-login',
@@ -67,6 +68,7 @@ export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly authState = inject(AuthStateService);
   private readonly router = inject(Router);
+  private readonly userPreferencesState = inject(UserPreferencesStateService);
 
   loading = signal(false);
   error = signal<string | null>(null);
@@ -88,6 +90,7 @@ export class LoginComponent {
       next: () => {
         this.loading.set(false);
         this.authState.markLoggedIn();
+        this.userPreferencesState.loadAndApplyPreferences();
         this.router.navigateByUrl('/');
       },
       error: (err) => {

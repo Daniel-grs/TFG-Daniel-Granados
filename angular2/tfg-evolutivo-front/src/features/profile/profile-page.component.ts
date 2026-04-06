@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, effect } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -11,6 +11,11 @@ import { UserSavedGasStation } from '../../app/models/user-saved-gas-station';
 import { FavouriteStationsSearchComponent } from './favourite-stations-search.component';
 import { Router } from '@angular/router';
 import { RouteNavigationService } from '../../app/services/route-navigations.service';
+import { UserPreferencesStateService } from '../../app/services/user-preferences-state.service';
+import { AuthStateService } from '../../app/services/auth-state.service';
+import { MapStateService } from '../../app/services/map-state.service';
+import { decodePolyline } from '../../app/utils/polyline.utils';
+
 
 @Component({
   selector: 'app-profile-page',
@@ -89,6 +94,7 @@ import { RouteNavigationService } from '../../app/services/route-navigations.ser
               <div class="actions">
                 <button type="button" (click)="renameRoute(route)">Renombrar</button>
                 <button type="button" (click)="deleteRoute(route.routeId)">Eliminar</button>
+                <button type="button" (click)="executeRoute(route.routeId)">Ejecutar</button>
               </div>
             </article>
           }
@@ -183,6 +189,9 @@ export class ProfilePageComponent {
   private readonly userService = inject(UserService);
   private readonly router = inject(Router);
   private readonly routeNavigation = inject(RouteNavigationService);
+  private readonly userPreferencesState = inject(UserPreferencesStateService);
+  private readonly authState = inject(AuthStateService);
+  private readonly mapState = inject(MapStateService);
 
   loading = signal(true);
   error = signal<string | null>(null);
@@ -202,8 +211,14 @@ export class ProfilePageComponent {
   });
 
   constructor() {
-    this.loadAll();
-  }
+  effect(() => {
+    if (!this.authState.isAuthenticated()) {
+      this.router.navigateByUrl('/');
+    }
+  });
+
+  this.loadAll();
+}
 
   loadAll() {
     this.loading.set(true);
@@ -250,6 +265,12 @@ export class ProfilePageComponent {
       next: () => {
         this.savingPreferences.set(false);
         this.preferencesMessage.set('Preferencias guardadas correctamente.');
+
+        const value = this.preferencesForm.getRawValue();
+        this.userPreferencesState.setPreferences({
+          theme: value.theme,
+          language: value.language,
+        });
       },
       error: (err) => {
         this.savingPreferences.set(false);
@@ -348,5 +369,20 @@ goToStation(station: UserSavedGasStation) {
   });
 
   this.router.navigateByUrl('/');
+}
+executeRoute(id: number) {
+  this.userService.executeSavedRoute(id).subscribe({
+    next: (res) => {
+      const allCoords = res.polylines
+        .flatMap((p: string) => decodePolyline(p));
+
+      this.mapState.setRoute(allCoords);
+
+      this.router.navigateByUrl('/');
+    },
+    error: () => {
+      alert('Error al ejecutar la ruta');
+    }
+  });
 }
 }

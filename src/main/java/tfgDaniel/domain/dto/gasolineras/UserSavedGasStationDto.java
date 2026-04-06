@@ -1,3 +1,5 @@
+package tfgDaniel.domain.dto.gasolineras;
+
 public class UserSavedGasStationDto {
 
     private String alias;

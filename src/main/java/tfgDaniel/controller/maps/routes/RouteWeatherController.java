@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tfgDaniel.domain.dto.maps.routes.CoordsWithWeather;
 import tfgDaniel.domain.dto.maps.routes.RouteGroup;
+import tfgDaniel.domain.dto.maps.routes.RoutePointWeatherDTO;
 import tfgDaniel.enums.EmissionType;
 import tfgDaniel.service.maps.routes.RoutesService;
 
@@ -36,24 +37,23 @@ public class RouteWeatherController {
 			@ApiResponse(responseCode = "400", description = "Solicitud errónea: no se pudieron calcular los pasos de la ruta.")
 	})
 	@GetMapping("/api/routes/weather")
-	public ResponseEntity<List<CoordsWithWeather>> getRouteWeather(
+	public ResponseEntity<List<RoutePointWeatherDTO>> getRouteWeather(
 			@RequestParam(required = true, defaultValue = "El Vellon") String origin,
 			@RequestParam(required = true, defaultValue = "El Molar") String destination,
 			@RequestParam(required = false, defaultValue = "") List<String> waypoints,
 			@RequestParam(required = false, defaultValue = "false") boolean optimizeWaypoints,
 			@RequestParam(required = false, defaultValue = "false") boolean optimizeRoute,
 			@RequestParam(required = false, defaultValue = "es") String language,
-			@RequestParam(required = false, defaultValue = "false") boolean avoidTolls,
-			@RequestParam(required = false, defaultValue = "C")EmissionType vehicleEmissionType
+			@RequestParam(required = false, defaultValue = "false") boolean avoidTolls
 			) {
 
-		Optional<RouteGroup> routeGroupOpt = routesService.getDirections(origin, destination, waypoints, optimizeWaypoints, optimizeRoute, language, avoidTolls, vehicleEmissionType);
+		Optional<RouteGroup> routeGroupOpt = routesService.getDirections(origin, destination, waypoints, optimizeWaypoints, optimizeRoute, language, avoidTolls);
 
 		if (routeGroupOpt.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
-		List<CoordsWithWeather> stepsWithWeather = routesService.getWeatherForRoute(routeGroupOpt.get());
+		List<RoutePointWeatherDTO> stepsWithWeather = routesService.getWeatherForRoute(routeGroupOpt.get());
 		return new ResponseEntity<>(stepsWithWeather, HttpStatus.OK);
 	}
 }

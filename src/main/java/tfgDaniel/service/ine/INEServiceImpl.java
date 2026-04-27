@@ -32,7 +32,7 @@ public class INEServiceImpl implements INEService {
 	@Autowired
 	private RestTemplate restTemplate;
 
-	private static final String INE_URL = "http://servicios.ine.es/wstempus/js/ES/VALORES_VARIABLE/19";
+	private static final String INE_URL = "https://servicios.ine.es/wstempus/js/ES/VALORES_VARIABLE/19?";
 
 	@Override
 	@Cacheable("codigoIne")

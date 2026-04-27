@@ -6,9 +6,8 @@ import java.util.Optional;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import tfgDaniel.domain.dto.maps.routes.Coords;
-import tfgDaniel.domain.dto.maps.routes.CoordsWithWeather;
 import tfgDaniel.domain.dto.maps.routes.RouteGroup;
-import tfgDaniel.enums.EmissionType;
+import tfgDaniel.domain.dto.maps.routes.RoutePointWeatherDTO;
 
 
 public interface RoutesService {
@@ -18,7 +17,7 @@ public interface RoutesService {
 //	String getUrl(List<Coords> waypoints, UriComponentsBuilder url);
 	String getUrl(List<Coords> waypoints, UriComponentsBuilder url, boolean shouldOptimize);
 
-	List<CoordsWithWeather> getWeatherForRoute(RouteGroup routeGroup);
+	List<RoutePointWeatherDTO> getWeatherForRoute(RouteGroup routeGroup);
 
 	List<Coords> extractRoutePoints(RouteGroup routeGroup);
 
@@ -29,8 +28,7 @@ public interface RoutesService {
 	List<Coords> decodePolyline(String polylinePoints);
 
 	Optional<RouteGroup> getDirections(String origin, String destination, List<String> waypoints,
-			boolean optimizeWaypoints, boolean optimizeRoute, String language, boolean avoidTolls,
-			EmissionType vehicleEmissionType);
+			boolean optimizeWaypoints, boolean optimizeRoute, String language, boolean avoidTolls);
 
 
 }

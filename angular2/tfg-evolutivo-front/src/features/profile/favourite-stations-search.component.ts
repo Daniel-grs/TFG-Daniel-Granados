@@ -43,11 +43,24 @@ import { GasStation } from '../../app/models/gas-station';
     </section>
   `,
   styles: [`
+    .card{
+      padding:15px;
+    }
     .form{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-bottom:12px;
+      display:grid;
+      grid-template-columns: 2fr 120px 1.2fr auto;
+      gap:12px;
+      align-items:end;
+      margin-bottom:16px;
+      margin-top:5px;
+    }
+    .form input{
+      width:100%;
+    }
+    .forma button{
+      height:48px;
+      padding:0 20px;
+      white-space:nowrap;
     }
     .list{
       display:grid;
@@ -63,6 +76,14 @@ import { GasStation } from '../../app/models/gas-station';
     .muted{
       color:#666;
       font-size:12px;
+    }
+    @media (max-width: 900px){
+      .form{
+        grid-template-columns: 1fr;
+      }
+      .form button{
+      width:100%
+      }  
     }
   `]
 })

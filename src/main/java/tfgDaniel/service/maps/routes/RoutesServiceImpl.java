@@ -1,5 +1,6 @@
 package tfgDaniel.service.maps.routes;
 
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import tfgDaniel.domain.dto.maps.routes.Coords;
 import tfgDaniel.domain.dto.maps.routes.CoordsWithWeather;
 import tfgDaniel.domain.dto.maps.routes.Leg;
 import tfgDaniel.domain.dto.maps.routes.RouteGroup;
+import tfgDaniel.domain.dto.maps.routes.RoutePointWeatherDTO;
 import tfgDaniel.domain.dto.maps.routes.Step;
 import tfgDaniel.domain.dto.weather.Dia;
 import tfgDaniel.domain.dto.weather.EstadoCielo;
@@ -75,17 +77,16 @@ public class RoutesServiceImpl implements RoutesService {
 
 	@Override
 	public Optional<RouteGroup> getDirections(String origin, String destination, List<String> waypoints,
-	        boolean optimizeWaypoints, boolean optimizeRoute, String language, boolean avoidTolls,
-	        EmissionType vehicleEmissionType) {
+	        boolean optimizeWaypoints, boolean optimizeRoute, String language, boolean avoidTolls) {
 
 	    Set<String> invalidDirections = new HashSet<>();
 
-	    Optional<Coords> originCoords = geocodeService.getCoordinates(origin);
+	    Optional<Coords> originCoords = geocodeService.getCoordinates(normalizeText(origin) + ", España");
 	    if (originCoords.isEmpty()) {
 	        invalidDirections.add(origin);
 	    }
 
-	    Optional<Coords> destinationCoords = geocodeService.getCoordinates(destination);
+	    Optional<Coords> destinationCoords = geocodeService.getCoordinates(normalizeText(destination) + ", España");
 	    if (destinationCoords.isEmpty()) {
 	        invalidDirections.add(destination);
 	    }
@@ -94,7 +95,7 @@ public class RoutesServiceImpl implements RoutesService {
 
 	    if (!waypoints.isEmpty()) {
 	        for (String waypoint : waypoints) {
-	            Optional<Coords> waypointCoords = geocodeService.getCoordinates(waypoint);
+	            Optional<Coords> waypointCoords = geocodeService.getCoordinates(normalizeText(waypoint) + ", España");
 
 	            if (waypointCoords.isEmpty()) {
 	                invalidDirections.add(waypoint);
@@ -119,10 +120,6 @@ public class RoutesServiceImpl implements RoutesService {
 
 	    if (avoidTolls) {
 	        url.queryParam("avoid", AVOID_TOLLS);
-	    }
-
-	    if (vehicleEmissionType != null) {
-	        url.queryParam("vehicleEmissionType", vehicleEmissionType.name());
 	    }
 
 	    if (!optimizeRoute) {
@@ -168,14 +165,6 @@ public class RoutesServiceImpl implements RoutesService {
 		return response;
 	}
 
-//	@Override
-//	public String getUrl(List<Coords> waypoints, UriComponentsBuilder url) {
-//		log.info("[routes-service] [" + LocalDateTime.now().toString() + "] "
-//				+ "Attempting to compose a URL from a list of waypoints.");
-//		url.queryParam("waypoints", "");
-//
-//		return url.toUriString() + waypoints.stream().map(coord -> coord.toString()).collect(Collectors.joining("|"));
-//	}
 	@Override
 	public String getUrl(List<Coords> waypoints, UriComponentsBuilder url, boolean shouldOptimize) {
 	    log.info("[routes-service] [" + LocalDateTime.now() + "] "
@@ -243,52 +232,63 @@ public class RoutesServiceImpl implements RoutesService {
 	}
 
 	@Override
-	public List<CoordsWithWeather> getWeatherForRoute(RouteGroup routeGroup) {
+	public List<RoutePointWeatherDTO> getWeatherForRoute(RouteGroup routeGroup) {
 		log.info("[routes-service] [" + LocalDateTime.now() + "] "
-	            + "Attempting to get weather for each point of the route.");
+				+ "Attempting to get weather for each point of the route.");
 
-	    List<Coords> sampledPoints = getSampledRoutePoints(routeGroup);
+		List<Coords> allPoints = extractRoutePolylinePoints(routeGroup);
+		List<Coords> sampledPoints = getKeyRoutePoints(routeGroup);
 
-	    if (sampledPoints.isEmpty()) {
-	        return List.of();
-	    }
+		if (sampledPoints.isEmpty() || allPoints.isEmpty()) {
+			return List.of();
+		}
 
-		Map<String, Coords> coordsPorMunicipio = new LinkedHashMap<>();
+		long totalSeconds = routeGroup.getRoutes().get(0).getLegs().stream()
+				.mapToLong(leg -> leg.getDuration().getValue())
+				.sum();
+
+		LocalDateTime departureTime = LocalDateTime.now();
+
+		Map<String, IndexedCoords> coordsPorMunicipio = new LinkedHashMap<>();
 
 		for (Coords coords : sampledPoints) {
-			Optional<String> codigoINE =
-					ineService.getCodigoINE(coords.getLat(), coords.getLng());
-			
+			Optional<String> codigoINE = ineService.getCodigoINE(coords.getLat(), coords.getLng());
+
 			if (codigoINE.isEmpty()) {
-				log.warn("[routes-service] [" + LocalDateTime.now().toString() + "] "
+				log.warn("[routes-service] [" + LocalDateTime.now() + "] "
 						+ "No INE code could be extracted for the given coords: "
-						+ coords.toString());
+						+ coords);
+				continue;
 			}
 
-			codigoINE.ifPresent(code ->
-					coordsPorMunicipio.putIfAbsent(code, coords)
+			int pointIndex = findClosestPointIndex(allPoints, coords);
+
+			coordsPorMunicipio.putIfAbsent(
+					codigoINE.get(),
+					new IndexedCoords(coords, pointIndex)
 			);
 		}
 
 		return coordsPorMunicipio.entrySet().stream()
 				.map(entry -> {
-
 					String codigoINE = entry.getKey();
-					Coords coords = entry.getValue();
+					IndexedCoords indexedCoords = entry.getValue();
+					Coords coords = indexedCoords.getCoords();
+					int pointIndex = indexedCoords.getIndex();
 
 					String address = reverseGeocodeService
 							.getAddress(coords.getLat(), coords.getLng())
 							.orElse("Ubicación desconocida");
 
-					Optional<Weather> weatherOpt =
-							weatherService.getWeather(codigoINE);
+					Optional<Weather> weatherOpt = weatherService.getWeather(codigoINE);
 
 					if (weatherOpt.isEmpty()) {
-						return new CoordsWithWeather(
+						return new RoutePointWeatherDTO(
 								address,
-								new HashMap<>(),
-								new HashMap<>()
-								);
+								null,
+								"Sin datos meteorológicos",
+								null
+						);
 					}
 
 					Weather weather = weatherOpt.get();
@@ -300,7 +300,7 @@ public class RoutesServiceImpl implements RoutesService {
 							mapaDescripciones.put(
 									estado.getPeriodo(),
 									estado.getDescripcion()
-									);
+							);
 						}
 					}
 
@@ -310,15 +310,31 @@ public class RoutesServiceImpl implements RoutesService {
 							mapaTemperaturas.put(
 									temp.getPeriodo(),
 									temp.getValue()
-									);
+							);
 						}
 					}
 
-					return new CoordsWithWeather(
+					double ratio = allPoints.size() > 1
+							? (double) pointIndex / (allPoints.size() - 1)
+							: 0.0;
+
+					long secondsToPoint = (long) (totalSeconds * ratio);
+					LocalDateTime estimatedArrival = departureTime.plusSeconds(secondsToPoint);
+					int estimatedHour = estimatedArrival.getHour();
+
+					String weatherDescription = mapaDescripciones.getOrDefault(
+							estimatedHour,
+							"Sin descripción disponible"
+					);
+
+					Double temperature = mapaTemperaturas.get(estimatedHour);
+
+					return new RoutePointWeatherDTO(
 							address,
-							mapaDescripciones,
-							mapaTemperaturas
-							);
+							estimatedHour,
+							weatherDescription,
+							temperature
+					);
 				})
 				.toList();
 	}
@@ -354,6 +370,30 @@ public class RoutesServiceImpl implements RoutesService {
 	            .filter(i -> i % step == 0 || i == allPoints.size() - 1)
 	            .mapToObj(allPoints::get)
 	            .toList();
+	}
+	private List<Coords> getKeyRoutePoints(RouteGroup routeGroup) {
+	    List<Coords> allPoints = extractRoutePolylinePoints(routeGroup);
+
+	    if (allPoints.isEmpty()) {
+	        return List.of();
+	    }
+
+	    Coords origin = allPoints.getFirst();
+	    Coords destination = allPoints.getLast();
+	    Coords middle = allPoints.get(allPoints.size() / 2);
+
+	    List<Coords> result = new ArrayList<>();
+	    result.add(origin);
+
+	    if (!origin.equals(middle) && !destination.equals(middle)) {
+	        result.add(middle);
+	    }
+
+	    if (!origin.equals(destination)) {
+	        result.add(destination);
+	    }
+
+	    return result;
 	}
 	
 	@Override
@@ -398,5 +438,51 @@ public class RoutesServiceImpl implements RoutesService {
 				+ "Successfully retrieved the leg coordinates for the given route.");
 		return legCoords;
 	}
+	private static class IndexedCoords {
+		private final Coords coords;
+		private final int index;
 
+		public IndexedCoords(Coords coords, int index) {
+			this.coords = coords;
+			this.index = index;
+		}
+
+		public Coords getCoords() {
+			return coords;
+		}
+
+		public int getIndex() {
+			return index;
+		}
+	}
+	
+	private int findClosestPointIndex(List<Coords> allPoints, Coords target) {
+		int closestIndex = 0;
+		double minDistance = Double.MAX_VALUE;
+
+		for (int i = 0; i < allPoints.size(); i++) {
+			Coords current = allPoints.get(i);
+			double distance = distanceSquared(current, target);
+
+			if (distance < minDistance) {
+				minDistance = distance;
+				closestIndex = i;
+			}
+		}
+
+		return closestIndex;
+	}
+
+	private double distanceSquared(Coords a, Coords b) {
+		double latDiff = a.getLat() - b.getLat();
+		double lngDiff = a.getLng() - b.getLng();
+		return latDiff * latDiff + lngDiff * lngDiff;
+	}
+
+	private String normalizeText(String text) {
+	    if (text == null) return "";
+	    return Normalizer.normalize(text, Normalizer.Form.NFD)
+	            .replaceAll("\\p{M}", "")
+	            .trim();
+	}
 }

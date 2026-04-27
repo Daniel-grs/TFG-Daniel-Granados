@@ -9,10 +9,8 @@ export interface RouteRequest {
   optimizeWaypoints?: boolean;
   optimizeRoute?: boolean;
 
-  language?: string;          // default "es" en back
+  language?: string;
   avoidTolls?: boolean;
 
-  vehicleEmissionType?: VehicleEmissionType; // default "C" en back
-
-  radius?: number; // para /api/routes/gasStations (requerido por back)
+  radius?: number;
 }

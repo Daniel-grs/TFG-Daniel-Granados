@@ -7,6 +7,7 @@ import { RouteRequest } from '../models/route-request';
 import { Coords } from '../models/coords';
 import { CoordsWithWeather } from '../models/coords-with-weather';
 import { RouteWeatherPoint } from '../models/route-weather';
+import { RouteSummary } from '../models/route-summary';
 
 @Injectable({ providedIn: 'root' })
 export class RouteApiService {
@@ -29,7 +30,6 @@ export class RouteApiService {
     if (req.optimizeRoute !== undefined) params = params.set('optimizeRoute', String(!!req.optimizeRoute));
     if (req.language) params = params.set('language', req.language);
     if (req.avoidTolls !== undefined) params = params.set('avoidTolls', String(!!req.avoidTolls));
-    if (req.vehicleEmissionType) params = params.set('vehicleEmissionType', req.vehicleEmissionType);
 
     return params;
   }
@@ -98,5 +98,27 @@ saveRoute(alias: string, req: RouteRequest) {
     withCredentials: true,
     responseType: 'text',
   });
+}
+getRouteSummary(req: RouteRequest) {
+  return this.http.get(this.baseUrl + '/api/routes', {
+    params: this.buildParams(req),
+    responseType: 'text',
+  }).pipe(
+    map(raw => this.parseJson<any>(raw)),
+    map((raw): RouteSummary => {
+      const firstRoute = raw?.routes?.[0];
+
+      const distanceMeters =
+        firstRoute?.legs?.reduce((acc: number, leg: any) => acc + (leg?.distance?.value ?? 0), 0) ?? null;
+
+      const durationSeconds =
+        firstRoute?.legs?.reduce((acc: number, leg: any) => acc + (leg?.duration?.value ?? 0), 0) ?? null;
+
+      return {
+        distanceMeters,
+        durationSeconds,
+      };
+    })
+  );
 }
 }

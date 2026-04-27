@@ -57,6 +57,15 @@ export class UserService {
     });
   }
 
+  getSavedRoute(routeId: number) {
+  return this.http.get<SavedRoute>(
+    `${this.baseUrl}/api/savedRoute/get/${routeId}`,
+    {
+      withCredentials: true,
+    }
+  );
+}
+
   deleteSavedRoute(routeId: number) {
     return this.http.delete<void>(this.baseUrl + `/api/savedRoute/delete/${routeId}`, {
       withCredentials: true,

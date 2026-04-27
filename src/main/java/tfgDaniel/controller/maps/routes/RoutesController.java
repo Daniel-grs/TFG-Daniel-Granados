@@ -52,11 +52,10 @@ public class RoutesController {
 			@RequestParam(required = false, defaultValue = "false") boolean optimizeWaypoints,
 			@RequestParam(required = false, defaultValue = "false") boolean optimizeRoute,
 			@RequestParam(required = false, defaultValue = "es") String language,
-			@RequestParam(required = false, defaultValue = "false") boolean avoidTolls,
-			@RequestParam(required = false, defaultValue = "C") EmissionType vehicleEmissionType
+			@RequestParam(required = false, defaultValue = "false") boolean avoidTolls
 			) {
 
-		Optional<RouteGroup> response = routesService.getDirections(origin, destination, waypoints, optimizeWaypoints, optimizeRoute, language, avoidTolls, vehicleEmissionType);
+		Optional<RouteGroup> response = routesService.getDirections(origin, destination, waypoints, optimizeWaypoints, optimizeRoute, language, avoidTolls);
 
 		if (response.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -80,11 +79,10 @@ public class RoutesController {
 			@RequestParam(required = false, defaultValue = "false") boolean optimizeWaypoints,
 			@RequestParam(required = false, defaultValue = "false") boolean optimizeRoute,
 			@RequestParam(required = false, defaultValue = "es") String language,
-			@RequestParam(required = false, defaultValue = "false") boolean avoidTolls,
-			@RequestParam(required = false, defaultValue = "C") EmissionType vehicleEmissionType
+			@RequestParam(required = false, defaultValue = "false") boolean avoidTolls
 			) {
 
-		Optional<RouteGroup> response = routesService.getDirections(origin, destination, waypoints, optimizeWaypoints, optimizeRoute, language, avoidTolls, vehicleEmissionType);
+		Optional<RouteGroup> response = routesService.getDirections(origin, destination, waypoints, optimizeWaypoints, optimizeRoute, language, avoidTolls);
 
 		if (response.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -110,11 +108,10 @@ public class RoutesController {
 			@RequestParam(required = false, defaultValue = "false") boolean optimizeWaypoints,
 			@RequestParam(required = false, defaultValue = "false") boolean optimizeRoute,
 			@RequestParam(required = false, defaultValue = "es") String language,
-			@RequestParam(required = false, defaultValue = "false") boolean avoidTolls,
-			@RequestParam(required = false, defaultValue = "C") EmissionType vehicleEmissionType
+			@RequestParam(required = false, defaultValue = "false") boolean avoidTolls
 			) {
 
-		Optional<RouteGroup> response = routesService.getDirections(origin, destination, waypoints, optimizeWaypoints, optimizeRoute, language, avoidTolls, vehicleEmissionType);
+		Optional<RouteGroup> response = routesService.getDirections(origin, destination, waypoints, optimizeWaypoints, optimizeRoute, language, avoidTolls);
 
 		if (response.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -142,11 +139,10 @@ public class RoutesController {
 			@RequestParam(required = false, defaultValue = "false") boolean optimizeWaypoints,
 			@RequestParam(required = false, defaultValue = "false") boolean optimizeRoute,
 			@RequestParam(required = false, defaultValue = "es") String language,
-			@RequestParam(required = false, defaultValue = "false") boolean avoidTolls,
-			@RequestParam(required = false, defaultValue = "C") EmissionType vehicleEmissionType
+			@RequestParam(required = false, defaultValue = "false") boolean avoidTolls
 			) {
 
-		Optional<RouteGroup> response = routesService.getDirections(origin, destination, waypoints, optimizeWaypoints, optimizeRoute, language, avoidTolls, vehicleEmissionType);
+		Optional<RouteGroup> response = routesService.getDirections(origin, destination, waypoints, optimizeWaypoints, optimizeRoute, language, avoidTolls);
 
 		if (response.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

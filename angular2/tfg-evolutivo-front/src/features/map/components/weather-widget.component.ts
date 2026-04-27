@@ -1,65 +1,125 @@
 import { Component, computed, inject } from '@angular/core';
 import { MapStateService } from '../../../app/services/map-state.service';
-import { RouteWeatherPoint } from '../../../app/models/route-weather';
 
 @Component({
   selector: 'app-weather-widget',
   standalone: true,
   template: `
-    <div style="border:1px solid #ddd; border-radius:12px; padding:12px;">
-      <h3 style="margin:0 0 8px;">Tiempo</h3>
+    <div class="weather-widget">
+      <h3 class="weather-widget__title">Tiempo en ruta</h3>
 
       @if (state().loading) {
-        <p>Cargando…</p>
+        <p class="weather-widget__muted">Cargando...</p>
       }
 
       @if (state().error) {
-        <p style="color:#b00020;">{{ state().error }}</p>
+        <p class="weather-widget__error">{{ state().error }}</p>
       }
 
       @if (!points().length && !state().loading) {
-        <p>Sin datos todavía.</p>
+        <p class="weather-widget__muted">Sin datos todavía.</p>
       }
 
-      @for (p of points(); track p.address) {
-        <div style="margin-top:10px; padding-top:10px; border-top:1px solid #eee;">
-          <strong>{{ p.address }}</strong>
+      <div class="weather-widget__list">
+        @for (point of points(); track point.address) {
+          <article class="weather-widget__item">
+            <div class="weather-widget__address">
+              {{ point.address }}
+            </div>
 
-          <div style="margin-top:8px; display:grid; gap:6px;">
-            @for (row of rowsFor(p); track row.hour) {
-              <div style="display:flex; justify-content:space-between; gap:10px;">
-                <span>{{ row.hour }}:00</span>
-                <span>{{ row.temp }} °C</span>
-                <span style="text-align:right; flex:1;">{{ row.desc }}</span>
-              </div>
-            }
-          </div>
-        </div>
-      }
+            <div class="weather-widget__meta">
+              <span>
+                Hora estimada:
+                <strong>
+                  {{
+                    point.estimatedArrivalHour !== null
+                      ? (point.estimatedArrivalHour + ':00')
+                      : 'N/D'
+                  }}
+                </strong>
+              </span>
+
+              <span>
+                Temperatura:
+                <strong>
+                  {{
+                    point.temperature !== null
+                      ? (point.temperature + ' ºC')
+                      : 'N/D'
+                  }}
+                </strong>
+              </span>
+            </div>
+
+            <div class="weather-widget__desc">
+              {{ point.weatherDescription || 'Sin descripción disponible' }}
+            </div>
+          </article>
+        }
+      </div>
     </div>
   `,
+  styles: [`
+    .weather-widget{
+      display:grid;
+      gap:12px;
+    }
+
+    .weather-widget__title{
+      margin:0;
+      font-size:1.2rem;
+      font-weight:700;
+      color:var(--text);
+    }
+
+    .weather-widget__list{
+      display:grid;
+      gap:10px;
+    }
+
+    .weather-widget__item{
+      padding:12px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background: var(--input-bg);
+      display:grid;
+      gap:8px;
+    }
+
+    .weather-widget__address{
+      font-weight:600;
+      color:var(--text);
+      line-height:1.35;
+    }
+
+    .weather-widget__meta{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      color:var(--text-soft);
+      font-size:14px;
+    }
+
+    .weather-widget__desc{
+      color:var(--text);
+      font-size:14px;
+      line-height:1.35;
+    }
+
+    .weather-widget__muted{
+      margin:0;
+      color:var(--text-soft);
+    }
+
+    .weather-widget__error{
+      margin:0;
+      color:#d44;
+    }
+  `]
 })
 export class WeatherWidgetComponent {
   private readonly mapState = inject(MapStateService);
   state = this.mapState.state;
 
   points = computed(() => this.state().weather ?? []);
-
-  // Saca filas ordenadas por hora (y limita a 6 para que no ocupe media vida)
-  rowsFor(p: RouteWeatherPoint) {
-    const temps = p.temperatures ?? {};
-    const descs = p.weatherDescription ?? {};
-
-    const hours = Object.keys(temps)
-      .map(h => Number(h))
-      .filter(n => Number.isFinite(n))
-      .sort((a, b) => a - b)
-      .slice(0, 23);
-
-    return hours.map(hour => ({
-      hour,
-      temp: temps[String(hour)],
-      desc: descs[String(hour)] ?? '',
-    }));
-  }
 }

@@ -15,101 +15,204 @@ import { RouteNavigationService } from '../../../app/services/route-navigations.
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <form [formGroup]="form" (ngSubmit)="submit()" style="display:grid; gap: 10px;">
-      <label>
-        Origen
-        <input formControlName="origin" placeholder="Madrid, España" />
-      </label>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="route-form">
 
-      <label>
-        Destino
-        <input formControlName="destination" placeholder="Valencia, España" />
-      </label>
+  <div class="route-form-grid">
+    <label>
+      Origen
+      <input formControlName="origin" placeholder="Madrid, España" />
+    </label>
 
-      <div>
-        <div style="display:flex; align-items:center; justify-content:space-between;">
-          <strong>Waypoints</strong>
-          <button type="button" (click)="addWaypoint()">+ Añadir</button>
-        </div>
+    <label>
+      Destino
+      <input formControlName="destination" placeholder="Valencia, España" />
+    </label>
+  </div>
 
-        <div formArrayName="waypoints" style="display:grid; gap:8px; margin-top:8px;">
-          @for (w of waypoints.controls; track $index; let i = $index) {
-            <div style="display:flex; gap:8px;">
-              <input [formControlName]="i" placeholder="Parada intermedia" />
-              <button type="button" (click)="removeWaypoint(i)">Quitar</button>
-            </div>
-          }
-        </div>
+  <div class="route-form-grid">
+    <div class="route-form-full">
+      <div class="waypoints-header">
+        <strong>Waypoints</strong>
+        <button class="secondary-btn" type="button" (click)="addWaypoint()">+ Añadir</button>
       </div>
 
-      <label>
-        Radio gasolineras
-        <input type="number" min="1" formControlName="radius" />
-      </label>
-
-      <label style="display:flex; gap:8px; align-items:center;">
-        <input type="checkbox" formControlName="optimizeWaypoints" />
-        Optimizar waypoints
-      </label>
-
-      <label style="display:flex; gap:8px; align-items:center;">
-        <input type="checkbox" formControlName="optimizeRoute" />
-        Optimizar ruta
-      </label>
-
-      <label style="display:flex; gap:8px; align-items:center;">
-        <input type="checkbox" formControlName="avoidTolls" />
-        Evitar peajes
-      </label>
-
-      <label>
-        Tipo de vehículo
-        <select formControlName="vehicleEmissionType">
-          <option value="C">C</option>
-          <option value="GASOLINE">GASOLINE</option>
-          <option value="DIESEL">DIESEL</option>
-          <option value="HYBRID">HYBRID</option>
-          <option value="ELECTRIC">ELECTRIC</option>
-        </select>
-      </label>
-
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-        <button type="submit" [disabled]="form.invalid || state.state().loading">
-          Buscar
-        </button>
-
-        <button type="button" (click)="clear()" [disabled]="state.state().loading">
-          Limpiar
-        </button>
-
-        @if (authState.isAuthenticated()) {
-          <button
-            type="button"
-            (click)="saveRoute()"
-            [disabled]="!canSave() || saving() || state.state().loading"
-          >
-            Guardar ruta
-          </button>
+      <div formArrayName="waypoints" class="waypoints-list">
+        @for (w of waypoints.controls; track $index; let i = $index) {
+          <div class="waypoint-row">
+            <input [formControlName]="i" placeholder="Parada intermedia" />
+            <button class="secondary-btn" type="button" (click)="removeWaypoint(i)">Quitar</button>
+          </div>
         }
       </div>
+    </div>
 
-      @if (state.state().loading) {
-        <p>Cargando…</p>
-      }
+    <label>
+      Radio gasolineras
+      <input type="number" min="1" formControlName="radius" />
+    </label>
+  </div>
 
-      @if (state.state().error) {
-        <p style="color:#b00020;">{{ state.state().error }}</p>
-      }
+  <div class="checks-grid">
+    <label class="check-card">
+      <input type="checkbox" formControlName="optimizeWaypoints" />
+      <span>Optimizar waypoints</span>
+    </label>
 
-      @if (saveSuccess()) {
-        <p style="color:green;">{{ saveSuccess() }}</p>
-      }
+    <label class="check-card">
+      <input type="checkbox" formControlName="optimizeRoute" />
+      <span>Optimizar ruta</span>
+    </label>
 
-      @if (saveError()) {
-        <p style="color:#b00020;">{{ saveError() }}</p>
-      }
-    </form>
+    <label class="check-card">
+      <input type="checkbox" formControlName="avoidTolls" />
+      <span>Evitar peajes</span>
+    </label>
+  </div>
+
+  <div class="route-form-actions">
+    <button class="primary-btn" type="submit" [disabled]="form.invalid || state.state().loading">
+      Buscar
+    </button>
+
+    <button class="secondary-btn" type="button" (click)="clear()" [disabled]="state.state().loading">
+      Limpiar
+    </button>
+
+    @if (authState.isAuthenticated()) {
+      <button
+        class="secondary-btn"
+        type="button"
+        (click)="saveRoute()"
+        [disabled]="!canSave() || saving() || state.state().loading"
+      >
+        Guardar ruta
+      </button>
+    }
+  </div>
+
+  @if (state.state().loading) {
+    <p class="status-msg">Cargando…</p>
+  }
+
+  @if (state.state().error) {
+    <p class="status-msg error">{{ state.state().error }}</p>
+  }
+
+  @if (saveSuccess()) {
+    <p class="status-msg ok">{{ saveSuccess() }}</p>
+  }
+
+  @if (saveError()) {
+    <p class="status-msg error">{{ saveError() }}</p>
+  }
+</form>
   `,
+  styles: [`
+  .route-form{
+    display: grid;
+    gap: 16px;
+  }
+
+  .route-form-grid{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .route-form-full{
+    display: grid;
+    gap: 10px;
+  }
+
+  .waypoints-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+
+  .waypoints-list{
+    display:grid;
+    gap:10px;
+  }
+
+  .waypoint-row{
+    display:flex;
+    gap:10px;
+  }
+
+  .checks-grid{
+    display:grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .check-card{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--input-bg);
+    min-height: 52px;
+  }
+
+  .check-card input[type="checkbox"]{
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--primary);
+  }
+
+  .check-card span{
+    color: var(--text);
+    font-weight: 500;
+    line-height: 1.2;
+  }
+
+  .route-form-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .route-form-actions button{
+    min-width: 140px;
+  }
+
+  .status-msg{
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .status-msg.error{
+    color: #d44;
+  }
+
+  .status-msg.ok{
+    color: #26a269;
+  }
+
+  @media (max-width: 900px){
+    .route-form-grid,
+    .checks-grid{
+      grid-template-columns: 1fr;
+    }
+
+    .waypoint-row{
+      flex-direction: column;
+    }
+
+    .route-form-actions{
+      flex-direction: column;
+    }
+
+    .route-form-actions button{
+      width: 100%;
+    }
+  }
+`]
 })
 export class RouteFormComponent {
   private readonly api = inject(RouteApiService);
@@ -152,8 +255,7 @@ export class RouteFormComponent {
         radius: pending.radius ?? 2,
         optimizeWaypoints: pending.optimizeWaypoints ?? false,
         optimizeRoute: pending.optimizeRoute ?? false,
-        avoidTolls: pending.avoidTolls ?? false,
-        vehicleEmissionType: (pending.vehicleEmissionType as 'C' | 'GASOLINE' | 'DIESEL' | 'HYBRID' | 'ELECTRIC') ?? 'C',
+        avoidTolls: pending.avoidTolls ?? false
       });
 
       this.routeNavigation.clearPendingRoute();
@@ -188,7 +290,6 @@ export class RouteFormComponent {
       optimizeWaypoints: v.optimizeWaypoints,
       optimizeRoute: v.optimizeRoute,
       avoidTolls: v.avoidTolls,
-      vehicleEmissionType: v.vehicleEmissionType,
       language: 'es',
     };
   }
@@ -206,9 +307,16 @@ export class RouteFormComponent {
       route: this.api.getPolylineCoords(req),
       gas: this.api.getGasStationsCoords(req),
       weather: this.api.getRouteWeather(req),
+      summary: this.api.getRouteSummary(req),
     }).subscribe({
-      next: ({ route, gas, weather }) => {
-        this.state.setData(route, gas, weather);
+      next: ({ route, gas, weather, summary }) => {
+        this.state.setData(
+          route, 
+          gas, 
+          weather, 
+          summary.distanceMeters ?? null,
+          summary.durationSeconds ?? null
+        );
       },
       error: (err) => {
         this.state.setError(err?.message ?? 'Error llamando al backend');

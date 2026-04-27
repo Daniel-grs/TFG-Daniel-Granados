@@ -67,8 +67,7 @@ public class RouteExecutionServiceImpl implements RouteExecutionService{
 				false,
 				false,
 				"es",
-				false,
-				EmissionType.C
+				false
 				);
 
 		if (routeGroupOpt.isEmpty()) {

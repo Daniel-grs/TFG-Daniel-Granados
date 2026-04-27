@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, effect } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -77,6 +77,15 @@ export class LoginComponent {
     user: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
     password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(4)] }),
   });
+
+  constructor() {
+  const nav = this.router.getCurrentNavigation();
+  const expired = nav?.extras?.state?.['sessionExpired'];
+
+  if (expired) {
+    this.error.set('Tu sesión ha caducado. Inicia sesión de nuevo.');
+  }
+}
 
   submit() {
     if (this.form.invalid) return;

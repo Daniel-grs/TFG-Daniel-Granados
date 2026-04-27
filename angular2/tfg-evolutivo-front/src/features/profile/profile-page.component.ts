@@ -15,6 +15,9 @@ import { UserPreferencesStateService } from '../../app/services/user-preferences
 import { AuthStateService } from '../../app/services/auth-state.service';
 import { MapStateService } from '../../app/services/map-state.service';
 import { decodePolyline } from '../../app/utils/polyline.utils';
+import { RouteApiService } from '../../app/services/route-api.service';
+import { RouteRequest } from '../../app/models/route-request';
+
 
 
 @Component({
@@ -192,6 +195,7 @@ export class ProfilePageComponent {
   private readonly userPreferencesState = inject(UserPreferencesStateService);
   private readonly authState = inject(AuthStateService);
   private readonly mapState = inject(MapStateService);
+  private readonly routeApi = inject(RouteApiService);
 
   loading = signal(true);
   error = signal<string | null>(null);
@@ -364,25 +368,63 @@ goToStation(station: UserSavedGasStation) {
     optimizeWaypoints: false,
     optimizeRoute: false,
     avoidTolls: false,
-    vehicleEmissionType: 'C',
     language: 'es',
   });
 
   this.router.navigateByUrl('/');
 }
-executeRoute(id: number) {
-  this.userService.executeSavedRoute(id).subscribe({
-    next: (res) => {
-      const allCoords = res.polylines
-        .flatMap((p: string) => decodePolyline(p));
+executeRoute(routeId: number) {
+  this.userService.getSavedRoute(routeId).subscribe({
+    next: (savedRoute) => {
+      const req = this.buildRouteRequestFromSavedRoute(savedRoute);
 
-      this.mapState.setRoute(allCoords);
+      this.mapState.setLoading(true);
 
-      this.router.navigateByUrl('/');
+      forkJoin({
+        route: this.routeApi.getPolylineCoords(req),
+        gas: this.routeApi.getGasStationsCoords(req),
+        weather: this.routeApi.getRouteWeather(req),
+        summary: this.routeApi.getRouteSummary(req),
+      }).subscribe({
+        next: ({ route, gas, weather, summary }) => {
+          this.mapState.setData(
+            route,
+            gas,
+            weather,
+            summary.distanceMeters ?? null,
+            summary.durationSeconds ?? null
+          );
+
+          this.router.navigateByUrl('/');
+        },
+        error: () => {
+          this.mapState.setError('No se pudo ejecutar la ruta guardada.');
+        }
+      });
     },
     error: () => {
-      alert('Error al ejecutar la ruta');
+      window.alert('No se pudo cargar la ruta guardada.');
     }
   });
+}
+private buildRouteRequestFromSavedRoute(savedRoute: SavedRoute): RouteRequest {
+  const points = savedRoute.points ?? [];
+
+  const origin = points.find(p => p.type === 'ORIGIN')?.address ?? '';
+  const destination = points.find(p => p.type === 'DESTINATION')?.address ?? '';
+  const waypoints = points
+    .filter(p => p.type === 'WAYPOINT')
+    .map(p => p.address);
+
+  return {
+    origin,
+    destination,
+    waypoints,
+    radius: 2,
+    optimizeWaypoints: savedRoute.preferences?.optimizeWaypoints ?? false,
+    optimizeRoute: savedRoute.preferences?.optimizeRoute ?? false,
+    avoidTolls: savedRoute.preferences?.avoidTolls ?? false,
+    language: savedRoute.preferences?.language ?? 'es',
+  };
 }
 }
